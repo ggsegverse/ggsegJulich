@@ -10,4 +10,7 @@
 #' @return A [ggseg.formats::ggseg_atlas] object (subcortical).
 #' @import ggseg.formats
 #' @export
+#' @examples
+#' julich()
+#' plot(julich())
 julich <- function() .julich
