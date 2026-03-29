@@ -1,20 +1,15 @@
 # Create Julich-Brain Cytoarchitectonic Atlas
 #
 # Source: https://search.kg.ebrains.eu/instances/ab191c17-8cd8-4622-aaac-eee11b2fa670
-# Reference: Amunts K, et al. (2020). Julich-Brain: A 3D probabilistic atlas
-#   of the human brain's cytoarchitecture. Science, 369(6506):988-992.
-#   doi:10.1126/science.abb4588
-#
-# The source data is a 4D probability map (296 regions). This script creates
-# a maximum probability map (argmax) and uses it as input to the subcortical
-# pipeline.
-#
+# Reference: Amunts K, et al. (2020). Science, 369(6506):988-992.
 # Date obtained: 2026-03-28
 #
 # Run with: Rscript data-raw/make_atlas.R
 
 library(ggseg.extra)
 library(ggseg.formats)
+
+Sys.setenv(FREESURFER_HOME = "/Applications/freesurfer/7.4.1")
 
 source_dir <- here::here("data-raw", "source")
 pmap_file <- file.path(source_dir, "JULICH_BRAIN_CYTOARCHITECTONIC_MAPS_2_9_MNI152_2009C_NONL_ASYM.pmaps.nii.gz")
@@ -53,7 +48,7 @@ lut_lines <- vapply(seq_along(labels), function(i) {
 writeLines(lut_lines, lut_file)
 
 # ── Create atlas ──────────────────────────────────────────────────
-julich <- create_subcortical_from_volume(
+atlases <- create_wholebrain_from_volume(
   input_volume = mpm_file,
   input_lut = lut_file,
   atlas_name = "julich",
@@ -62,8 +57,10 @@ julich <- create_subcortical_from_volume(
   cleanup = FALSE
 )
 
-print(julich)
-plot(julich)
+.julich_cortical <- atlases$cortical
+.julich_subcortical <- atlases$subcortical
 
-.julich <- julich
-usethis::use_data(.julich, overwrite = TRUE, compress = "xz", internal = TRUE)
+usethis::use_data(
+  .julich_cortical, .julich_subcortical,
+  overwrite = TRUE, compress = "xz", internal = TRUE
+)
