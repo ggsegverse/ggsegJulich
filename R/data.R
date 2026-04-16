@@ -13,4 +13,4 @@
 #' @examples
 #' julich()
 #' plot(julich())
-julich <- function() .julich
+julich <- function() .julich # nolint: object_usage_linter.

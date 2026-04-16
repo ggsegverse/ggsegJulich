@@ -1,6 +1,7 @@
 # Create Julich-Brain Cytoarchitectonic Atlas
 #
-# Source: https://search.kg.ebrains.eu/instances/ab191c17-8cd8-4622-aaac-eee11b2fa670
+# Source: https://search.kg.ebrains.eu/instances/
+#   ab191c17-8cd8-4622-aaac-eee11b2fa670
 # Reference: Amunts K, et al. (2020). Science, 369(6506):988-992.
 # Date obtained: 2026-03-28
 #
@@ -12,8 +13,14 @@ library(ggseg.formats)
 Sys.setenv(FREESURFER_HOME = "/Applications/freesurfer/7.4.1")
 
 source_dir <- here::here("data-raw", "source")
-pmap_file <- file.path(source_dir, "JULICH_BRAIN_CYTOARCHITECTONIC_MAPS_2_9_MNI152_2009C_NONL_ASYM.pmaps.nii.gz")
-label_file <- file.path(source_dir, "JULICH_BRAIN_CYTOARCHITECTONIC_MAPS_2_9_MNI152_2009C_NONL_ASYM.txt")
+pmap_file <- file.path(
+  source_dir,
+  "JULICH_BRAIN_CYTOARCHITECTONIC_MAPS_2_9_MNI152_2009C_NONL_ASYM.pmaps.nii.gz"
+)
+label_file <- file.path(
+  source_dir,
+  "JULICH_BRAIN_CYTOARCHITECTONIC_MAPS_2_9_MNI152_2009C_NONL_ASYM.txt"
+)
 
 # ── Create maximum probability map ───────────────────────────────
 mpm_file <- file.path(source_dir, "julich_mpm.nii.gz")
@@ -34,7 +41,8 @@ if (!file.exists(mpm_file)) {
 
   out <- RNifti::asNifti(mpm, reference = vol)
   RNifti::writeNifti(out, mpm_file)
-  cli::cli_alert_success("MPM written with {length(unique(as.vector(mpm[mpm > 0])))} regions")
+  n_regions <- length(unique(as.vector(mpm[mpm > 0])))
+  cli::cli_alert_success("MPM written with {n_regions} regions")
 }
 
 # ── Create LUT ────────────────────────────────────────────────────
