@@ -34,8 +34,9 @@ library(ggsegJulich)
 plot(julich())
 ```
 
-<img src="man/figures/README-julich-1.png" alt="" width="100%" /> \##
-Data source
+<img src="man/figures/README-julich-1.png" alt="" width="100%" /> 
+
+## Data source
 
 [EBRAINS Knowledge
 Graph](https://search.kg.ebrains.eu/instances/ab191c17-8cd8-4622-aaac-eee11b2fa670).
