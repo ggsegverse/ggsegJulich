@@ -1,13 +1,27 @@
-
+---
+format: gfm
+---
 
 <!-- README.md is generated from README.qmd. Please edit that file -->
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  fig.width = 10,
+  fig.retina = 3
+)
+```
 
 # ggsegJulich
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/ggsegverse/ggsegJulich/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ggsegverse/ggsegJulich/actions/workflows/R-CMD-check.yaml)
-[![r-universe](https://ggseg.r-universe.dev/badges/ggsegJulich.png)](https://ggseg.r-universe.dev/ggsegJulich)
+[![r-universe](https://ggseg.r-universe.dev/badges/ggsegJulich)](https://ggseg.r-universe.dev/ggsegJulich)
 <!-- badges: end -->
 
 Julich-Brain Cytoarchitectonic Atlas for the ggseg ecosystem.
@@ -17,7 +31,9 @@ Julich-Brain Cytoarchitectonic Atlas for the ggseg ecosystem.
 We recommend installing the ggseg-atlases through the ggseg
 [r-universe](https://ggseg.r-universe.dev/ui#builds):
 
-``` r
+```{r}
+#| label: install-r-universe
+#| eval: false
 options(repos = c(
   ggseg = "https://ggseg.r-universe.dev",
   CRAN = "https://cloud.r-project.org"
@@ -28,14 +44,15 @@ install.packages("ggsegJulich")
 
 You can install this package from [GitHub](https://github.com/) with:
 
-``` r
+```r
 # install.packages("pak")
 pak::pak("ggsegverse/ggsegJulich")
 ```
 
 ## Cortical atlas
 
-``` r
+```{r}
+#| label: cortical
 library(ggseg)
 library(ggsegJulich)
 library(ggplot2)
@@ -51,11 +68,10 @@ ggplot() +
   theme_void()
 ```
 
-<img src="man/figures/README-cortical-1.png" style="width:100.0%" />
-
 ## Subcortical atlas
 
-``` r
+```{r}
+#| label: subcortical
 ggplot() +
   geom_brain(
     atlas = julich_subcortical(),
@@ -67,13 +83,10 @@ ggplot() +
   theme_void()
 ```
 
-<img src="man/figures/README-subcortical-1.png" style="width:100.0%" />
-
 ## Data source
 
-Amunts K et al. (2020). Julich-Brain: A 3D probabilistic atlas of the
-human brain’s cytoarchitecture. *Science*, 369(6506), 988-992.
+Amunts K et al. (2020). Julich-Brain: A 3D probabilistic atlas of the human
+brain's cytoarchitecture. *Science*, 369(6506), 988-992.
 [doi:10.1126/science.abb4588](https://doi.org/10.1126/science.abb4588)
 
-Data obtained from [EBRAINS Knowledge
-Graph](https://search.kg.ebrains.eu/instances/ab191c17-8cd8-4622-aaac-eee11b2fa670).
+Data obtained from [EBRAINS Knowledge Graph](https://search.kg.ebrains.eu/instances/ab191c17-8cd8-4622-aaac-eee11b2fa670).
