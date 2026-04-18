@@ -1,9 +1,9 @@
 on:
   push:
     branches: [main, master]
-    paths: ["README.Rmd"]
+    paths: ["README.qmd"]
   pull_request:
-    paths: ["README.Rmd"]
+    paths: ["README.qmd"]
   workflow_dispatch:
 
 name: render-readme
@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: quarto-dev/quarto-actions/setup@v2
 
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -31,11 +31,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rmarkdown, local::.
+          extra-packages: local::.
           needs: readme
 
       - name: Render README
-        run: Rscript -e 'rmarkdown::render("README.Rmd")'
+        run: quarto render README.qmd
 
       - name: Commit and push
         if: github.event_name == 'push'
@@ -43,4 +43,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md man/figures/README-*
-          git diff --staged --quiet || (git commit -m "Re-render README.Rmd" && git push)
+          git diff --staged --quiet || (git commit -m "Re-render README.qmd" && git push)
