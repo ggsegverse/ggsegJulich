@@ -45,30 +45,47 @@ if (!file.exists(mpm_file)) {
   cli::cli_alert_success("MPM written with {n_regions} regions")
 }
 
-# ── Create LUT ────────────────────────────────────────────────────
+# ── Create LUT with type column ───────────────────────────────────
 labels <- readLines(label_file)[-1]
-lut_file <- file.path(source_dir, "julich_LUT.txt")
-lut_lines <- vapply(seq_along(labels), function(i) {
-  name <- gsub("^[0-9]+ '|'$", "", labels[i])
-  name <- gsub(" ", "_", name)
-  sprintf("%d %s 0 0 0 0", i, name)
-}, character(1))
-writeLines(lut_lines, lut_file)
+lut <- data.frame(
+  idx = seq_along(labels),
+  label = vapply(labels, function(l) {
+    name <- gsub("^[0-9]+ '|'$", "", l)
+    gsub(" ", "_", name)
+  }, character(1)),
+  R = 0L, G = 0L, B = 0L, A = 0L,
+  stringsAsFactors = FALSE
+)
+
+lut$type <- ifelse(
+  grepl("Cerebellum|Dentate_Nucleus|Fastigial_Nucleus|Interposed_Nucleus",
+        lut$label),
+  "cerebellar",
+  "cortical"
+)
+cli::cli_alert_info("Cerebellar labels: {sum(lut$type == 'cerebellar')}")
 
 # ── Create atlas ──────────────────────────────────────────────────
+suit_flat <- here::here("..", "data-raw", "tpl-SUIT_flat.surf.gii")
+
 atlases <- create_wholebrain_from_volume(
   input_volume = mpm_file,
-  input_lut = lut_file,
+  input_lut = lut,
   atlas_name = "julich",
   output_dir = "data-raw",
-  skip_existing = TRUE,
+  suit_surface = suit_flat,
+  skip_existing = FALSE,
   cleanup = FALSE
 )
 
 .julich_cortical <- atlases$cortical
 .julich_subcortical <- atlases$subcortical
+.julich_cerebellar <- atlases$cerebellar
 
-usethis::use_data(
-  .julich_cortical, .julich_subcortical,
-  overwrite = TRUE, compress = "xz", internal = TRUE
-)
+if (!is.null(.julich_cerebellar)) {
+  usethis::use_data(.julich_cortical, .julich_subcortical,
+    .julich_cerebellar, overwrite = TRUE, compress = "xz", internal = TRUE)
+} else {
+  usethis::use_data(.julich_cortical, .julich_subcortical,
+    overwrite = TRUE, compress = "xz", internal = TRUE)
+}
