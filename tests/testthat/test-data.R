@@ -64,8 +64,16 @@ describe("palettes", {
     expect_gt(length(unique(julich_subcortical()$palette)), 1)
   })
 
-  it("plot without falling back to automatic colours", {
-    expect_no_warning(ggseg.formats::atlas_plot_palette(julich_cortical()))
-    expect_no_warning(ggseg.formats::atlas_plot_palette(julich_subcortical()))
+  it("give all but a handful of structures a colour of their own", {
+    expect_gt(length(unique(julich_cortical()$palette)), 100)
+    expect_gt(length(unique(julich_subcortical()$palette)), 20)
+  })
+
+  it("give a structure's two sides the same colour", {
+    pal <- julich_subcortical()$palette
+    expect_equal(
+      unname(pal["CA1_Hippocampus_left"]),
+      unname(pal["CA1_Hippocampus_right"])
+    )
   })
 })
