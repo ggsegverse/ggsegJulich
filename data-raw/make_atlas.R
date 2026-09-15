@@ -46,46 +46,116 @@ if (!file.exists(mpm_file)) {
 }
 
 # ── Create LUT with type column ───────────────────────────────────
+# The `type` column is what keeps the cytoarchitectonic areas on the
+# cortical surface. Without it the pipeline falls back to a vertex-count
+# heuristic, which sends small-but-cortical parcels (Area 45, Area TE 3,
+# the insular and orbitofrontal series) into the subcortical atlas. Every
+# `Area_*` parcel, the GapMaps and the entorhinal cortex are cortex; the
+# hippocampal subfields, amygdalar and basal forebrain nuclei, the bed
+# nucleus, the metathalamus and the deep cerebellar nuclei are not.
 labels <- readLines(label_file)[-1]
+label_names <- vapply(
+  labels,
+  function(l) gsub(" ", "_", gsub("^[0-9]+ '|'$", "", l)),
+  character(1),
+  USE.NAMES = FALSE
+)
+
+is_cortical <- grepl("^Area_", label_names) |
+  grepl("GapMap", label_names) |
+  grepl("^Entorhinal_Cortex", label_names)
+
+# The release ships names only, so the colours are ours to choose. Give
+# each structure a hue of its own, spread over the circle and stepped
+# through three luminances so neighbouring hues still separate, and give a
+# structure's two sides the same colour, the way FreeSurfer's own tables
+# do. Cortical and subcortical structures are spread separately, since
+# they end up in separate atlases.
+structure_colours <- function(labels) {
+  structures <- unique(sub("_(left|right)$", "", labels))
+  n <- length(structures)
+  cols <- grDevices::hcl(
+    h = seq(0, 360, length.out = n + 1L)[seq_len(n)],
+    c = 75,
+    l = rep_len(c(45, 65, 82), n)
+  )
+  grDevices::col2rgb(cols[match(sub("_(left|right)$", "", labels), structures)])
+}
+
+rgb_matrix <- matrix(0L, nrow = 3, ncol = length(label_names))
+rgb_matrix[, is_cortical] <- structure_colours(label_names[is_cortical])
+rgb_matrix[, !is_cortical] <- structure_colours(label_names[!is_cortical])
+
 lut <- data.frame(
-  idx = seq_along(labels),
-  label = vapply(labels, function(l) {
-    name <- gsub("^[0-9]+ '|'$", "", l)
-    gsub(" ", "_", name)
-  }, character(1)),
-  R = 0L, G = 0L, B = 0L, A = 0L,
+  idx = seq_along(label_names),
+  label = label_names,
+  R = as.integer(rgb_matrix[1, ]),
+  G = as.integer(rgb_matrix[2, ]),
+  B = as.integer(rgb_matrix[3, ]),
+  A = 0L,
+  type = ifelse(is_cortical, "cortical", "subcortical"),
   stringsAsFactors = FALSE
 )
-
-lut$type <- ifelse(
-  grepl("Cerebellum|Dentate_Nucleus|Fastigial_Nucleus|Interposed_Nucleus",
-        lut$label),
-  "cerebellar",
-  "cortical"
+cli::cli_alert_info(
+  "{sum(is_cortical)} cortical, {sum(!is_cortical)} subcortical labels"
 )
-cli::cli_alert_info("Cerebellar labels: {sum(lut$type == 'cerebellar')}")
+# write_lut() writes the FreeSurfer columns only, and the type column is
+# worth keeping alongside them as a record of how the split was made.
+writeLines(
+  sprintf(
+    "%d %s %d %d %d %d %s",
+    lut$idx, lut$label, lut$R, lut$G, lut$B, lut$A, lut$type
+  ),
+  file.path(source_dir, "julich_LUT.txt")
+)
 
 # ── Create atlas ──────────────────────────────────────────────────
-suit_flat <- here::here("..", "data-raw", "tpl-SUIT_flat.surf.gii")
-
 atlases <- create_wholebrain_from_volume(
   input_volume = mpm_file,
   input_lut = lut,
   atlas_name = "julich",
   output_dir = "data-raw",
-  suit_surface = suit_flat,
+  # Intermediates are cached by step, not by LUT content, so a changed
+  # lookup table would otherwise be ignored on a re-run.
   skip_existing = FALSE,
   cleanup = FALSE
 )
 
-.julich_cortical <- atlases$cortical
-.julich_subcortical <- atlases$subcortical
-.julich_cerebellar <- atlases$cerebellar
+# ── Polish geometry ───────────────────────────────────────────────
+# The pipelines hand back raw voxel-traced outlines. Simplify first, so
+# the smoothing has the last word on the outline.
+.julich_cortical <- atlases$cortical |>
+  atlas_simplify(keep = 0.3) |>
+  atlas_smooth(smoothness = 0.4)
 
-if (!is.null(.julich_cerebellar)) {
-  usethis::use_data(.julich_cortical, .julich_subcortical,
-    .julich_cerebellar, overwrite = TRUE, compress = "xz", internal = TRUE)
-} else {
-  usethis::use_data(.julich_cortical, .julich_subcortical,
-    overwrite = TRUE, compress = "xz", internal = TRUE)
-}
+# The grey `cortex_` backdrop is context, not a parcel. Its small islands
+# and holes are what makes it read as a brain, and both polish steps eat
+# them: `atlas_smooth()`'s default `method = "close"` fills anything
+# narrower than the smoothing distance, and an aggressive simplify drops
+# short rings outright. Together they took the outline from 96 rings to
+# 32. So the parcels are simplified and smoothed as before, and the
+# context is only lightly simplified and never smoothed, which keeps 95
+# of the 96.
+#
+# The outline still has no sulci, and no polish setting can give it any:
+# the whole-brain pipeline builds the context from the union of the
+# atlas's own cortical labels, and Julich's maximum probability map
+# covers both banks of every sulcus, so the mantle is already solid in
+# the volume. A sulcal outline would have to come from a cortical ribbon
+# (the aseg one, as `ggsegHO`'s `ho_sub` uses), which is a change to
+# `ggseg.extra`, not to this script.
+.julich_subcortical <- atlases$subcortical |>
+  atlas_simplify(keep = 0.25, exclude = "^cortex") |>
+  atlas_smooth(smoothness = 0.4, exclude = "^cortex") |>
+  atlas_simplify(keep = 0.9, labels = "^cortex")
+
+cat("Cortical regions:", nrow(.julich_cortical$core), "\n")
+cat("Subcortical regions:", nrow(.julich_subcortical$core), "\n")
+
+usethis::use_data(
+  .julich_cortical,
+  .julich_subcortical,
+  overwrite = TRUE,
+  compress = "xz",
+  internal = TRUE
+)
