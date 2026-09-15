@@ -128,10 +128,26 @@ atlases <- create_wholebrain_from_volume(
   atlas_simplify(keep = 0.3) |>
   atlas_smooth(smoothness = 0.4)
 
+# The grey `cortex_` backdrop is context, not a parcel. Its small islands
+# and holes are what makes it read as a brain, and both polish steps eat
+# them: `atlas_smooth()`'s default `method = "close"` fills anything
+# narrower than the smoothing distance, and an aggressive simplify drops
+# short rings outright. Together they took the outline from 96 rings to
+# 32. So the parcels are simplified and smoothed as before, and the
+# context is only lightly simplified and never smoothed, which keeps 95
+# of the 96.
+#
+# The outline still has no sulci, and no polish setting can give it any:
+# the whole-brain pipeline builds the context from the union of the
+# atlas's own cortical labels, and Julich's maximum probability map
+# covers both banks of every sulcus, so the mantle is already solid in
+# the volume. A sulcal outline would have to come from a cortical ribbon
+# (the aseg one, as `ggsegHO`'s `ho_sub` uses), which is a change to
+# `ggseg.extra`, not to this script.
 .julich_subcortical <- atlases$subcortical |>
-  atlas_simplify(keep = 0.2, labels = "^cortex") |>
   atlas_simplify(keep = 0.25, exclude = "^cortex") |>
-  atlas_smooth(smoothness = 0.4)
+  atlas_smooth(smoothness = 0.4, exclude = "^cortex") |>
+  atlas_simplify(keep = 0.9, labels = "^cortex")
 
 cat("Cortical regions:", nrow(.julich_cortical$core), "\n")
 cat("Subcortical regions:", nrow(.julich_subcortical$core), "\n")

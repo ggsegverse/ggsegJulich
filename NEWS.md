@@ -37,6 +37,26 @@
 * Both atlases are simplified and smoothed after creation, which the
   pipeline no longer does on its own.
 
+* The grey brain outline behind the subcortical structures keeps its
+  detail. It used to be polished like a parcel -- simplified hard and then
+  smoothed with a morphological close, which fills anything narrower than
+  the smoothing distance -- and came out of that with 32 of its 96 rings.
+  The parcels are still simplified and smoothed; the outline is now only
+  lightly simplified and never smoothed, and keeps 95 of the 96. The
+  subcortical atlas grows from 11,960 to 15,711 vertices.
+
+  The outline still has no sulci, and no polish setting can give it any.
+  The whole-brain pipeline builds it from the union of the atlas's own
+  cortical labels, and Julich's maximum probability map covers both banks
+  of every sulcus, so the silhouette is already solid in the volume.
+
+* The four deep cerebellar nuclei stay in the subcortical atlas. They are
+  the only cerebellar content Julich has -- 8 of the 50 subcortical
+  labels, 16.8 cm3, and no cerebellar cortex, vermis or lobules -- so
+  there is no cerebellar parcellation to split off, and
+  `create_cerebellar_from_volume()` samples the SUIT cortical flatmap,
+  which deep nuclei do not reach.
+
 # ggsegJulich 1.0.0
 
 * First release.
