@@ -1,4 +1,4 @@
-# ggsegJulich 1.0.1
+# ggsegJulich 1.0.0.9001
 
 * Both atlases are rebuilt from source against the fixed `ggseg.extra`
   whole-brain pipeline (`ggseg.extra` 1.9.9.9029, `ggseg.formats`
