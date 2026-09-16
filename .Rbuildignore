@@ -10,3 +10,4 @@ pkgdown
 docs
 ^codemeta\.json$
 ^README\.qmd$
+^\.lintr$
