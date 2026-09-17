@@ -23,12 +23,17 @@
 * Both atlases have a real palette again: one hue per structure, shared by
   its two hemispheres, with cortical and subcortical structures drawn from
   the ramp separately.
+* The grey brain the subcortical structures are read against is a cortical
+  ribbon rather than a solid mantle. Julich's own cortical labels cover both
+  banks of every sulcus, so their union held 2.44 times the voxels of a
+  ribbon and drew a blob; the silhouette now comes from FreeSurfer's `aseg`,
+  where sulcal CSF is unlabelled, so the gyri and sulci are visible. The
+  posterior fossa is filled in too, so the cerebellar nuclei are no longer
+  drawn against empty space.
 * The subcortical geometry is polished in two passes. The grey brain
-  outline the structures are read against is simplified only as far as
-  leaves its contour rings intact - 55 of them, where a single pass over
-  the whole atlas left 28 and closed the ventricles and temporal horns
+  outline is simplified only as far as leaves its contour rings intact -
+  113 of them, 60 of which are interior, where a single pass over the whole
+  atlas left 99 and closed ventricles, temporal horns and sulcal fragments
   along with them - and smoothed with Chaikin's corner cutting. The
-  structures themselves take a firmer pass and read as smooth nuclei
-  rather than as voxel staircases. Chaikin adds vertices where it cuts
-  corners, so `julich_subcortical()` comes to 14,503 vertices against the
-  14,152 it is built from; that is the polish working, not a regression.
+  structures themselves take a firmer pass and read as smooth nuclei rather
+  than as voxel staircases.
