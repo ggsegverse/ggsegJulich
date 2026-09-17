@@ -87,19 +87,16 @@ describe("source coverage", {
     built <- sub(
       "^[lr]h_",
       "",
-      c(julich_cortical()$core$label, julich_subcortical()$core$label)
+      c(atlas_labels(julich_cortical()), atlas_labels(julich_subcortical()))
     )
     # A stale atlas shipped alongside a moved-on pipeline shows up here as
-    # regions the source has and the atlas does not. `source-labels.txt` is
+    # regions the source has and the atlas does not, and set equality
+    # catches an invented region the same way. `source-labels.txt` is
     # written from the release's own label list by `data-raw/make_atlas.R`,
     # less IF (Amygdala), which never wins the maximum probability map and
-    # so has no voxels to project.
+    # so has no voxels to project - its absence is asserted by the same
+    # comparison.
     expect_setequal(unique(built), source_labels)
-  })
-
-  it("leaves out the one region that has no voxels of its own", {
-    labels <- c(julich_cortical()$core$label, julich_subcortical()$core$label)
-    expect_false(any(grepl("IF_Amygdala", labels)))
   })
 })
 
