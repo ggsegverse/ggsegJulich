@@ -105,13 +105,13 @@ describe("palette", {
 })
 
 describe("subcortical geometry", {
-  it("polishes the cortex context gently", {
+  it("polishes the cortex context without deleting rings", {
     rings <- ring_vertices(julich_subcortical(), context = TRUE)
-    # Ventricles and temporal horns are interior rings, and the detail
-    # that draws them is what the structures' firmer simplification
-    # spends first: that pass leaves the context under 1500 vertices.
+    # Every ventricle, temporal horn and sulcal fragment is a ring of its
+    # own, and a simplification firm enough to drop rings deletes anatomy.
+    # The structures' own `keep` would leave the context around 28.
+    expect_gt(nrow(rings), 50)
     expect_gt(sum(rings$subgroup > 1), 10)
-    expect_gt(sum(rings$vertices), 2000)
   })
 
   it("leaves the structures smooth rather than faceted", {

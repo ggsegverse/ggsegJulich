@@ -24,7 +24,11 @@
   its two hemispheres, with cortical and subcortical structures drawn from
   the ramp separately.
 * The subcortical geometry is polished in two passes. The grey brain
-  outline the structures are read against keeps its ventricles and
-  temporal horns, where a single pass over the whole atlas closed them;
-  the structures themselves read as smooth nuclei rather than as voxel
-  staircases.
+  outline the structures are read against is simplified only as far as
+  leaves its contour rings intact - 55 of them, where a single pass over
+  the whole atlas left 28 and closed the ventricles and temporal horns
+  along with them - and smoothed with Chaikin's corner cutting. The
+  structures themselves take a firmer pass and read as smooth nuclei
+  rather than as voxel staircases. Chaikin adds vertices where it cuts
+  corners, so `julich_subcortical()` comes to 14,503 vertices against the
+  14,152 it is built from; that is the polish working, not a regression.

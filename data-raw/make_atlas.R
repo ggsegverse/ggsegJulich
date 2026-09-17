@@ -166,18 +166,26 @@ if (length(missing) > 0) {
 
 # ── Polish geometry ───────────────────────────────────────────────
 # Simplify first, so the smoothing has the last word on the outline.
-# Chaikin's corner cutting takes the voxel staircase off the brain
-# outline without moving the ring; the default `close` method dilates and
-# then erodes, which closes the ventricles and temporal horns the context
-# exists to show. The structures are meant to read as smooth nuclei, so
-# they take the firmer simplification and `close`.
+#
+# The `cortex` context is a sulcal ribbon, and what has to survive the
+# polish is its topology, not its vertex budget: every gyral crown and
+# sulcal fragment is a contour ring of its own, and a simplification
+# aggressive enough to drop whole rings deletes anatomy rather than
+# tidying it. So the context is bounded by ring count, and takes only as
+# much simplification as leaves the ring count intact, with Chaikin's
+# corner cutting to take off the voxel staircase - it shortens corners
+# without moving the ring. The default `close` method dilates and then
+# erodes, which fattens the ribbon until adjacent sulci merge.
+#
+# The structures are the opposite case: solid nuclei with nothing
+# interior to lose, so they take the firmer simplification and `close`.
 .julich_cortical <- atlases$cortical |>
   atlas_simplify(keep = 0.3) |>
   atlas_smooth(smoothness = 0.4)
 
 .julich_subcortical <- atlases$subcortical |>
-  atlas_simplify(keep = 0.5, labels = "^cortex") |>
-  atlas_smooth(smoothness = 0.35, labels = "^cortex", method = "chaikin") |>
+  atlas_simplify(keep = 0.85, labels = "^cortex") |>
+  atlas_smooth(smoothness = 0.25, labels = "^cortex", method = "chaikin") |>
   atlas_simplify(keep = 0.25, exclude = "^cortex") |>
   atlas_smooth(smoothness = 0.4, exclude = "^cortex")
 
