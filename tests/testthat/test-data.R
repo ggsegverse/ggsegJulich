@@ -81,6 +81,28 @@ describe("region split", {
   })
 })
 
+describe("source coverage", {
+  it("carries every region the source release parcellates", {
+    source_labels <- readLines(test_path("source-labels.txt"))
+    built <- sub(
+      "^[lr]h_",
+      "",
+      c(julich_cortical()$core$label, julich_subcortical()$core$label)
+    )
+    # A stale atlas shipped alongside a moved-on pipeline shows up here as
+    # regions the source has and the atlas does not. `source-labels.txt` is
+    # written from the release's own label list by `data-raw/make_atlas.R`,
+    # less IF (Amygdala), which never wins the maximum probability map and
+    # so has no voxels to project.
+    expect_setequal(unique(built), source_labels)
+  })
+
+  it("leaves out the one region that has no voxels of its own", {
+    labels <- c(julich_cortical()$core$label, julich_subcortical()$core$label)
+    expect_false(any(grepl("IF_Amygdala", labels)))
+  })
+})
+
 describe("palette", {
   expect_structure_colour <- function(atlas) {
     palette <- atlas_palette(atlas)

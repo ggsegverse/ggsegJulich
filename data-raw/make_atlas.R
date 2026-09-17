@@ -155,6 +155,13 @@ atlases <- create_wholebrain_from_volume(
 # The pipeline's own name mangling decides what a label is called on the
 # way out, so borrow it rather than guess at it.
 expected_absent <- paste0("IF_(Amygdala)_", c("left", "right"))
+# The same list, as the labels the built atlas is expected to carry, goes
+# to the tests: it is read off the source release rather than off the
+# atlas, so a later build that quietly drops regions fails there too.
+writeLines(
+  sort(ggseg.extra:::sanitize_label(setdiff(label_names, expected_absent))),
+  here::here("tests", "testthat", "source-labels.txt")
+)
 built <- c(atlases$cortical$core$label, atlases$subcortical$core$label)
 missing <- setdiff(
   ggseg.extra:::sanitize_label(setdiff(lut$label, expected_absent)),
