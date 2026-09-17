@@ -167,15 +167,17 @@ if (length(missing) > 0) {
 # ── Polish geometry ───────────────────────────────────────────────
 # Simplify first, so the smoothing has the last word on the outline.
 #
-# The `cortex` context is a sulcal ribbon, and what has to survive the
-# polish is its topology, not its vertex budget: every gyral crown and
-# sulcal fragment is a contour ring of its own, and a simplification
-# aggressive enough to drop whole rings deletes anatomy rather than
-# tidying it. So the context is bounded by ring count, and takes only as
-# much simplification as leaves the ring count intact, with Chaikin's
-# corner cutting to take off the voxel staircase - it shortens corners
-# without moving the ring. The default `close` method dilates and then
-# erodes, which fattens the ribbon until adjacent sulci merge.
+# The `cortex` context is a sulcal ribbon where every gyral crown and
+# sulcal fragment is a contour ring of its own, so simplifying it costs
+# rings rather than only vertices: `keep = 0.5` leaves 92 of the
+# ribbon's 122 rings, where `keep = 0.85` leaves 113. The rings that go
+# are small crowns and sulcal fragments, deleted outright rather than
+# simplified. That is a deliberate trade: the context is a silhouette to
+# read structures against, not an anatomical claim, and the smoother
+# outline reads better than the busier one. Chaikin's corner cutting
+# takes off the voxel staircase without moving the rings that remain;
+# the default `close` method dilates and then erodes, which fattens the
+# ribbon until adjacent sulci merge.
 #
 # The structures are the opposite case: solid nuclei with nothing
 # interior to lose, so they take the firmer simplification and `close`.
@@ -184,8 +186,8 @@ if (length(missing) > 0) {
   atlas_smooth(smoothness = 0.4)
 
 .julich_subcortical <- atlases$subcortical |>
-  atlas_simplify(keep = 0.85, labels = "^cortex") |>
-  atlas_smooth(smoothness = 0.25, labels = "^cortex", method = "chaikin") |>
+  atlas_simplify(keep = 0.5, labels = "^cortex") |>
+  atlas_smooth(smoothness = 0.35, labels = "^cortex", method = "chaikin") |>
   atlas_simplify(keep = 0.25, exclude = "^cortex") |>
   atlas_smooth(smoothness = 0.4, exclude = "^cortex")
 

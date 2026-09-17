@@ -1,3 +1,17 @@
+# ggsegJulich 1.0.0.9001
+
+* The grey brain context in `julich_subcortical()` is simplified harder,
+  for a smoother read: `keep = 0.5` and `smoothness = 0.35` rather than
+  `keep = 0.85` and `smoothness = 0.25`. The cost is contour rings. The
+  unsimplified ribbon has 122 rings, 64 of them interior; `keep = 0.85`
+  kept 113 and 60, and `keep = 0.5` keeps 92 and 51. The rings that go
+  are small gyral crowns and sulcal fragments, deleted outright rather
+  than simplified. The context is a silhouette to read structures
+  against rather than an anatomical claim, and the smoother outline was
+  judged to read better. Anyone changing this again is trading rings for
+  smoothness in one direction or the other. The structures' own pass is
+  unchanged.
+
 # ggsegJulich 1.0.0.9000
 
 * Regions are split between the two atlases by anatomy rather than by how
@@ -30,10 +44,11 @@
   where sulcal CSF is unlabelled, so the gyri and sulci are visible. The
   posterior fossa is filled in too, so the cerebellar nuclei are no longer
   drawn against empty space.
-* The subcortical geometry is polished in two passes. The grey brain
-  outline is simplified only as far as leaves its contour rings intact -
-  113 of them, 60 of which are interior, where a single pass over the whole
-  atlas left 99 and closed ventricles, temporal horns and sulcal fragments
-  along with them - and smoothed with Chaikin's corner cutting. The
-  structures themselves take a firmer pass and read as smooth nuclei rather
-  than as voxel staircases.
+* The subcortical geometry is polished in two passes rather than one. The
+  grey brain outline is simplified and smoothed with Chaikin's corner
+  cutting, which takes off the voxel staircase without fattening the
+  ribbon; the structures themselves take a firmer pass with the default
+  closing, and read as smooth nuclei rather than as voxel staircases. A
+  single pass over the whole atlas left the outline at 99 contour rings
+  and closed ventricles, temporal horns and sulcal fragments along with
+  them.
