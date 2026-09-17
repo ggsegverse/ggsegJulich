@@ -58,6 +58,22 @@ structure_of <- function(labels) {
   sub("^[lr]h_", "", sub("_(left|right)$", "", labels))
 }
 
+# What the source release says the atlas must carry, in the names the
+# pipeline gives them on the way out. IF (Amygdala) never wins the
+# maximum probability map, so it has no voxels to project; anything else
+# going missing is a pipeline fault, which the reconciliation below
+# aborts on. The tests hold the shipped atlas to the same list, so it
+# goes to them as a fixture.
+expected_absent <- paste0("IF_(Amygdala)_", c("left", "right"))
+stopifnot(all(expected_absent %in% label_names))
+expected_labels <- sort(
+  ggseg.extra:::sanitize_label(setdiff(label_names, expected_absent))
+)
+writeLines(
+  expected_labels,
+  here::here("tests", "testthat", "source-labels.txt")
+)
+
 lut <- lut_classify_anatomy(
   mpm_file,
   data.frame(
@@ -150,16 +166,8 @@ atlases <- create_wholebrain_from_volume(
 )
 
 # ── Reconcile labels in against regions out ───────────────────────
-# IF (Amygdala) never wins the maximum probability map, so it has no
-# voxels to project. Anything else going missing is a pipeline fault.
-# The pipeline's own name mangling decides what a label is called on the
-# way out, so borrow it rather than guess at it.
-expected_absent <- paste0("IF_(Amygdala)_", c("left", "right"))
 built <- c(atlases$cortical$core$label, atlases$subcortical$core$label)
-missing <- setdiff(
-  ggseg.extra:::sanitize_label(setdiff(lut$label, expected_absent)),
-  sub("^[lr]h_", "", built)
-)
+missing <- setdiff(expected_labels, sub("^[lr]h_", "", built))
 if (length(missing) > 0) {
   cli::cli_abort("{length(missing)} label{?s} reached no atlas: {missing}")
 }

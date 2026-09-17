@@ -1,5 +1,14 @@
 # ggsegJulich 1.0.0.9001
 
+* The shipped atlases are checked by name against the source release's
+  own label list, so a `sysdata.rda` left behind by a moved-on pipeline
+  fails the tests rather than reaching users. `data-raw/make_atlas.R`
+  writes that list to `tests/testthat/source-labels.txt`: of the 296
+  labels the 2.9 release parcellates, the 294 the atlas is expected to
+  carry, less `IF (Amygdala)`, which never wins the maximum probability
+  map and so has no voxels to project. The rebuild in 1.0.0.9000 carries
+  all 294 (#7).
+
 * The grey brain context in `julich_subcortical()` is simplified harder,
   for a smoother read: `keep = 0.5` and `smoothness = 0.35` rather than
   `keep = 0.85` and `smoothness = 0.25`. The cost is contour rings. The
