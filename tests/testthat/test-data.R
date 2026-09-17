@@ -105,13 +105,14 @@ describe("palette", {
 })
 
 describe("subcortical geometry", {
-  it("polishes the cortex context without deleting rings", {
+  it("keeps the sulcal detail the context is simplified down to", {
     rings <- ring_vertices(julich_subcortical(), context = TRUE)
-    # Every ventricle, temporal horn and sulcal fragment is a ring of its
-    # own, and a simplification firm enough to drop rings deletes anatomy.
-    # The structures' own `keep` would leave the context around 28.
-    expect_gt(nrow(rings), 50)
-    expect_gt(sum(rings$subgroup > 1), 10)
+    # The unsimplified ribbon has 122 contour rings, 64 interior; the
+    # build's `keep = 0.5` leaves 92 and 51. These floors sit below that
+    # and well above the roughly 28 the structures' own `keep` would
+    # leave, so they catch the outline collapsing into a blob.
+    expect_gt(nrow(rings), 80)
+    expect_gt(sum(rings$subgroup > 1), 40)
   })
 
   it("leaves the structures smooth rather than faceted", {
