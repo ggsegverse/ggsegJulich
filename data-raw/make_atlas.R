@@ -157,8 +157,7 @@ atlases <- create_wholebrain_from_volume(
   input_lut = lut,
   atlas_name = "julich",
   output_dir = "data-raw",
-  cortical_labels = forced_cortical,
-  subcortical_labels = forced_subcortical,
+  labels = list(cortical = forced_cortical, subcortical = forced_subcortical),
   # Intermediates are cached by step, not by LUT content, so a changed
   # lookup table would otherwise be ignored on a re-run.
   skip_existing = FALSE,
